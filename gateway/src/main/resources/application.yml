@@ -1,0 +1,60 @@
+server:
+  port: ${SERVER_PORT:9527}
+
+spring:
+  # 由於 Spring 的 Gateway 是採 Reactive 的，與 MVC 相衝，不特別指定這個設定會出錯。
+  main:
+    web-application-type: reactive
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      # 開啟服務發現，搭配 Eureka
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: payment_route
+          # lb 是 Spring 提供用來做 Loadbalance 用的
+          uri: lb://${PAYMENT_SERVICE_HOST_NAME:PAYMENT-SERVICE}
+          predicates:
+            - Path=/payment/get/**
+        - id: order_route
+          uri: lb://${ORDER_SERVICE_HOST_NAME:ORDER-SERVICE}
+          # Spring 內建提供的 GatewayFilter 可以於此設定
+#          filters:
+            # AddRequestHeaderGatewayFilter 會於通過驗證的 Request 上加上一個 Header
+#            - AddRequestParameter=X-5Request-Id, 1024
+          predicates:
+            - Path=/order/get/**
+            # 指定時間之後才能存取，否則 404，注意這個字串格式是 ZoneDateTime.toString() 來的。
+#            - After=2020-06-17T12:53:40.325+08:00[Asia/Shanghai]
+            # 指定時間之前才能存取，否則 404
+#            - Before=2020-06-17T11:53:40.325+08:00[Asia/Shanghai]
+            # 指定時間內才能存取，否則 404
+#            - Between=2020-06-17T11:53:40.325+08:00[Asia/Shanghai],2020-06-17T12:53:40.325+08:00[Asia/Shanghai]
+            # 限定 Cookie 中帶有 key, value 者才能存取
+#            - Cookie=username,angenin
+            # Request 需要有 headerName, [正規表達式] 者才能存取，\d+ 表示要整數
+#            - Header=X-Request-Id, \d+
+            # Host 限制
+#            - Host=**.angenin.com
+            # 方法限制
+#            - Method=GET
+            # url 中，必須要有 key, [正規表達式] 者才能存取，\d+ 表示要整數
+#            - Query=username, \d+
+
+eureka:
+  client:
+    # 需要將其註冊服務，預設開，不要註冊的時候 False 即可
+    register-with-eureka: true
+    # 是否要從 Eureka Server 取得服務註冊訊息，這是要配合負載均衡用的，單節點之下可以關閉
+    fetch-registry: true
+    service-url:
+      # 所有服務的註冊與查詢用 URL 設定
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL:http://localhost-one:7001/eureka,http://localhost-two:7002/eureka}
+  instance:
+    # 修改顯示的主機名稱
+    instance-id: ${EUREKA_INSTANCE_ID:order_80}
+    # 於頁面中 Link 顯示實際 IP 位置，而非 Domain
+    prefer-ip-address: true

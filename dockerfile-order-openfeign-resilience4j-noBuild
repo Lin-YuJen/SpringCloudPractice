@@ -1,0 +1,5 @@
+FROM eclipse-temurin:17.0.4.1_1-jre-alpine
+COPY ./consumer-order-openfeign-resilience4j/build/libs/consumer-order-openfeign-resilience4j.jar .
+EXPOSE 80
+ENV SERVER_PORT=80
+CMD ["java", "-jar", "consumer-order-openfeign-resilience4j.jar"]

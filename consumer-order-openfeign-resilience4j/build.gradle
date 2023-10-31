@@ -1,0 +1,39 @@
+plugins {
+    id "org.springframework.boot"
+    id "io.spring.dependency-management"
+    id "org.jetbrains.kotlin.plugin.spring"
+    id "org.jetbrains.kotlin.plugin.allopen"
+}
+
+group = 'com.enix.consumerOFR4J'
+
+dependencies {
+    // Common Library
+    implementation project(':common')
+    // kotlin-log
+    implementation "io.github.microutils:kotlin-logging:${kotlinLoggingVersion}"
+    // Web
+    implementation 'org.springframework.boot:spring-boot-starter-web', {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-json'
+    }
+    implementation "com.google.code.gson:gson:${gsonVersion}"
+    // 監控用
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // AOP Supported
+    implementation "org.springframework.boot:spring-boot-starter-aop"
+
+    // Eureka Client
+    implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:${springCloudEurekaVersion}"
+    // OpenFeign
+    implementation "org.springframework.cloud:spring-cloud-starter-openfeign:${springCloudOpenFeignVersion}"
+
+    // Resilience4J non-reactive-version
+    implementation "org.springframework.cloud:spring-cloud-circuitbreaker-resilience4j:${resilience4jVersion}"
+
+    // Micrometer Tracing
+    implementation "io.micrometer:micrometer-tracing:${micrometerVersion}"
+    implementation "io.micrometer:micrometer-tracing-bridge-brave:${micrometerVersion}"
+    implementation "io.zipkin.reporter2:zipkin-reporter-brave:${zipkinReporterBraveVersion}"
+    implementation "io.github.openfeign:feign-micrometer:${feignMicrometerVersion}"
+}

@@ -1,0 +1,16 @@
+FROM gradle:7.4.2-jdk17-alpine as builder
+
+WORKDIR /SpringCloudPractice
+COPY ./common /SpringCloudPractice/common
+COPY ./config-client /SpringCloudPractice/config-client
+COPY ./build.gradle /SpringCloudPractice
+COPY ./gradle.properties /SpringCloudPractice
+COPY ./settings.gradle /SpringCloudPractice
+WORKDIR /SpringCloudPractice/config-client
+RUN gradle build
+
+FROM eclipse-temurin:17.0.4.1_1-jre-alpine
+COPY --from=builder /SpringCloudPractice/config-client/build/libs/config-client.jar .
+EXPOSE 3355
+ENV SERVER_PORT=3355
+CMD ["java", "-jar", "config-client.jar"]

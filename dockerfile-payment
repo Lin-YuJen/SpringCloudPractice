@@ -1,0 +1,16 @@
+FROM gradle:7.4.2-jdk17-alpine as builder
+
+WORKDIR /SpringCloudPractice
+COPY ./common /SpringCloudPractice/common
+COPY ./provider-payment /SpringCloudPractice/provider-payment
+COPY ./build.gradle /SpringCloudPractice
+COPY ./gradle.properties /SpringCloudPractice
+COPY ./settings.gradle /SpringCloudPractice
+WORKDIR /SpringCloudPractice/provider-payment
+RUN gradle build
+
+FROM eclipse-temurin:17.0.4.1_1-jre-alpine
+COPY --from=builder /SpringCloudPractice/provider-payment/build/libs/provider-payment.jar .
+EXPOSE 8080
+ENV SERVER_PORT=8080
+CMD ["java", "-jar", "provider-payment.jar"]

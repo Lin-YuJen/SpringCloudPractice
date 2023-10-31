@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: payment-cs-service
+  mvc:
+    converters:
+      preferred-json-mapper: gson
+  cloud:
+    consul:
+      host: ${CONSUL_HOST:localhost}
+      port: ${CONSUL_PORT:8500}
+      discovery:
+        service-name: ${CONSUL_SERVICE_NAME:payment-cs-services-x}
+server:
+  port: ${SERVER_PORT:8086}
+

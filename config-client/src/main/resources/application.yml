@@ -1,0 +1,53 @@
+server:
+  port: ${SERVER_PORT:80}
+
+spring:
+  application:
+    name: config-client
+  mvc:
+    converters:
+      preferred-json-mapper: gson
+
+  config:
+    # 這個是 Springboot 2.4 之後需要增加的設定值，否則會錯誤
+#    import: "optional:configserver:"
+    import: "configserver:"
+  cloud:
+    config:
+      # 以下會組成 URI => http://config-3344.com:3344/main/config/dev
+      # Branch 名稱
+      label: ${CONFIG_LABEL:main}
+      # 設定檔名稱
+      name: ${CONFIG_NAME:config}
+      # 後綴環境名稱
+      profile: ${CONFIG_PROFILE:dev}
+      # Config Server 位置
+      uri: ${CONFIG_URI:http://gitlab.me}
+  rabbitmq:
+    host: ${RABBITMQ_HOST:rabbit-mq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+eureka:
+  client:
+    # 需要將其註冊服務，預設開，不要註冊的時候 False 即可
+    register-with-eureka: true
+    # 是否要從 Eureka Server 取得服務註冊訊息，這是要配合負載均衡用的，單節點之下可以關閉
+    fetch-registry: true
+    service-url:
+      # 所有服務的註冊與查詢用 URL 設定
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL:http://localhost-one:7001/eureka,http://localhost-two:7002/eureka}
+  instance:
+    # 修改顯示的主機名稱
+    instance-id: ${EUREKA_INSTANCE_ID:config-client}
+    # 於頁面中 Link 顯示實際 IP 位置，而非 Domain
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+#        include: health,info,refresh,beans,conditions
+#        exclude:

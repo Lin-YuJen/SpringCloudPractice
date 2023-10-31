@@ -1,0 +1,177 @@
+version: '3.8'
+
+services:
+  eureka-server-1:
+    build:
+      context: .
+      dockerfile: dockerfile-eureka
+    image: eureka-server:latest
+    environment:
+      SERVER_PORT: 7001
+      EUREKA_INSTANCE_HOSTNAME: eureka_one
+      EUREKA_CLIENT_SERVICE_URL: http://eureka-server-2:7002/eureka
+    ports:
+      - 7001:7001
+    networks:
+      - eureka-network
+
+  eureka-server-2:
+    build:
+      context: .
+      dockerfile: dockerfile-eureka
+    image: eureka-server:latest
+    environment:
+      SERVER_PORT: 7002
+      EUREKA_INSTANCE_HOSTNAME: eureka_two
+      EUREKA_CLIENT_SERVICE_URL: http://eureka-server-1:7001/eureka
+    ports:
+      - 7002:7002
+    networks:
+      - eureka-network
+
+  gateway-1:
+    image: gateway:latest
+    environment:
+      SERVER_PORT: 9527
+      PAYMENT_SERVICE_HOST_NAME: PAYMENT-SERVICE
+      ORDER_SERVICE_HOST_NAME: ORDER-OPENFEIGN-RESILIENCE4J-SERVICE
+      EUREKA_CLIENT_SERVICE_URL: http://eureka-server-1:7001/eureka, http://eureka-server-2:7002/eureka
+      EUREKA_INSTANCE_ID: gateway_9527
+    ports:
+      - 9527:9527
+    depends_on:
+      - eureka-server-1
+      - eureka-server-2
+    networks:
+      - eureka-network
+
+  payment-service-1:
+    build:
+      context: .
+      dockerfile: dockerfile-payment
+    image: payment-service:latest
+    environment:
+      SERVER_PORT: 8080
+      EUREKA_CLIENT_SERVICE_URL: http://eureka-server-1:7001/eureka, http://eureka-server-2:7002/eureka
+      EUREKA_INSTANCE_ID: payment_service_8080
+      DATABASE_USERNAME: ${database_username}
+      DATABASE_P6D: ${database_p6d}
+      DATABASE_HOST: database-mysql
+      DATABASE_NAME: ${database_name}
+      ZIPKIN_URL: http://zipkin-server:9411
+    ports:
+      - 8080:8080
+    depends_on:
+      - eureka-server-1
+      - eureka-server-2
+      - database-mysql
+    networks:
+      - eureka-network
+
+  payment-service-2:
+    build:
+      context: .
+      dockerfile: dockerfile-payment
+    image: payment-service:latest
+    environment:
+      SERVER_PORT: 8081
+      EUREKA_CLIENT_SERVICE_URL: http://eureka-server-1:7001/eureka, http://eureka-server-2:7002/eureka
+      EUREKA_INSTANCE_ID: payment_service_8081
+      DATABASE_USERNAME: ${database_username}
+      DATABASE_P6D: ${database_p6d}
+      DATABASE_HOST: database-mysql
+      DATABASE_NAME: ${database_name}
+      ZIPKIN_URL: http://zipkin-server:9411
+    ports:
+      - 8081:8081
+    depends_on:
+      - eureka-server-1
+      - eureka-server-2
+      - database-mysql
+    networks:
+      - eureka-network
+
+  order-service-1:
+    build:
+      context: .
+      dockerfile: dockerfile-order
+    image: order-service:latest
+    environment:
+      SERVER_PORT: 80
+      # 這是 payment-service 的 Springboot 中 spring.application.name 的數值，會變大寫
+      PAYMENT_SERVICE_HOST_NAME: PAYMENT-SERVICE
+      EUREKA_CLIENT_SERVICE_URL: http://eureka-server-1:7001/eureka, http://eureka-server-2:7002/eureka
+      EUREKA_INSTANCE_ID: order_service_80
+    ports:
+      - 80:80
+    depends_on:
+      - eureka-server-1
+      - eureka-server-2
+    networks:
+      - eureka-network
+
+  order-openfeign-service-1:
+    image: order-openfeign-service:latest
+    environment:
+      SERVER_PORT: 10080
+      PAYMENT_SERVICE_HOST_NAME: PAYMENT-SERVICE
+      EUREKA_CLIENT_SERVICE_URL: http://eureka-server-1:7001/eureka, http://eureka-server-2:7002/eureka
+      EUREKA_INSTANCE_ID: order_service_10080
+    ports:
+      - 10080:10080
+    depends_on:
+      - eureka-server-1
+      - eureka-server-2
+    networks:
+      - eureka-network
+
+  order-openfeign-resilience4j-service-1:
+    image: order-openfeign-resilience4j-service:latest
+    environment:
+      SERVER_PORT: 10081
+      PAYMENT_SERVICE_HOST_NAME: PAYMENT-SERVICE
+      ZIPKIN_URL: http://zipkin-server:9411
+      EUREKA_CLIENT_SERVICE_URL: http://eureka-server-1:7001/eureka, http://eureka-server-2:7002/eureka
+      EUREKA_INSTANCE_ID: order_service_10081
+    ports:
+      - 10081:10081
+    depends_on:
+      - eureka-server-1
+      - eureka-server-2
+    networks:
+      - eureka-network
+
+  database-mysql:
+    build:
+      context: ./database-mysql
+      dockerfile: dockerfile
+    image: cloud_mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: ${database_p6d}
+      MYSQL_DATABASE: ${database_name}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    security_opt:
+      - seccomp:unconfined
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 3
+    ports:
+      - 33060:3306
+    networks:
+      eureka-network:
+
+  zipkin-server:
+    image: openzipkin/zipkin:2.24
+    ports:
+      - 9411:9411
+    networks:
+      eureka-network:
+
+volumes:
+  mysql-data:
+
+networks:
+  # Eureka Server 間需要能互連
+  eureka-network:

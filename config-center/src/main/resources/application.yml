@@ -1,0 +1,47 @@
+server:
+  port: ${SERVER_PORT:80}
+
+spring:
+  application:
+    name: config-center
+  mvc:
+    converters:
+      preferred-json-mapper: gson
+  cloud:
+    config:
+      server:
+        git:
+          # Git 位置
+          uri: ${GIT_URI:http://gitlab.me/enixlin/springcloudtest.git}
+          # 設定檔的目錄位置
+          search-paths: ${GIT_SEARCH_PATHS:springcloudtest}
+      # 讀取的分支
+      label: ${GIT_LABEL:main}
+  rabbitmq:
+    host: ${RABBITMQ_HOST:rabbit-mq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+eureka:
+  client:
+    # 需要將其註冊服務，預設開，不要註冊的時候 False 即可
+    register-with-eureka: true
+    # 是否要從 Eureka Server 取得服務註冊訊息，這是要配合負載均衡用的，單節點之下可以關閉
+    fetch-registry: true
+    service-url:
+      # 所有服務的註冊與查詢用 URL 設定
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL:http://localhost-one:7001/eureka,http://localhost-two:7002/eureka}
+  instance:
+    # 修改顯示的主機名稱
+    instance-id: ${EUREKA_INSTANCE_ID:config-center}
+    # 於頁面中 Link 顯示實際 IP 位置，而非 Domain
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # 開放通知微服務設定更新 API
+        include: "*"
+#        include: 'busrefresh'

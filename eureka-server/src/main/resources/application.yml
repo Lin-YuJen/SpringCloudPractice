@@ -1,0 +1,21 @@
+server:
+  port: ${SERVER_PORT:7001}
+
+eureka:
+  instance:
+    # Eureka 服務實體名稱
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
+    # 是否開啟自我保護，沒收到 heartbeat 是否不要立即移除，預設不立即移除 (true)
+#    enable-self-preservation: false
+  # 雖然這是 Eureka Server，但是設定還是用 Client，不要懷疑
+  client:
+    # 自我服務註冊不需要
+    register-with-eureka: false
+    # false 表示自己就是服務註冊中心，僅需維護自身即可，不需要去檢索其他服務
+    fetch-registry: false
+    service-url:
+      # 本服務要註冊到的 Server 位置，其 URL 為何??
+      # 多點 Server 下可以填寫其他 Server 的位置，也就是互相註冊。
+      # 這裡可以直接用 Array 的方式寫，第一個數值會是預設的數值
+#      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL:http://localhost:7001/eureka}

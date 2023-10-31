@@ -1,0 +1,69 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+/**
+ * 參考 https://www.jianshu.com/p/b169c7240401 進行設定
+ */
+buildscript {
+    ext {
+        javaVersion = '17'
+        kotlinVersion = '1.8.21'
+        groovyVersion = '4.0.11'
+        springbootVersion = '3.0.6'
+    }
+}
+
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version "$kotlinVersion"
+    id "org.springframework.boot" version "$springbootVersion"
+    id "io.spring.dependency-management" version "1.1.0"
+    // 支援 Spring 相關 Annotation 自動 open
+    id "org.jetbrains.kotlin.plugin.spring" version "$kotlinVersion"
+    id "org.jetbrains.kotlin.plugin.allopen" version "$kotlinVersion"
+    id "org.jetbrains.kotlin.plugin.jpa" version "$kotlinVersion"
+    id 'groovy'
+}
+
+group = 'com.enix'
+version = '1.0'
+
+allprojects {
+    apply plugin: "org.jetbrains.kotlin.jvm"
+    apply plugin: "groovy"
+
+    ext {
+        kotlinLoggingVersion = "3.0.5"
+        gsonVersion = "2.10.1"
+        springCloudOpenFeignVersion = "4.0.2"
+        springCloudGatewayVersion = "4.0.6"
+        springCloudEurekaVersion = "4.0.1"
+        springCloudConfigServerVersion = "4.0.3"
+        springCloudBootstrapVersion = "4.0.3"
+        springCloudBusVersion = "4.0.1"
+        springCloudStreamRabbitMQVersion = "4.0.3"
+        micrometerVersion = "1.1.1"
+        zipkinReporterBraveVersion = "2.16.4"
+        feignMicrometerVersion = "12.3"
+        resilience4jVersion = "2.0.2"
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    sourceCompatibility = javaVersion.toInteger()
+    targetCompatibility = javaVersion.toInteger()
+    tasks.withType(KotlinCompile).configureEach {
+        kotlinOptions {
+            jvmTarget = javaVersion
+        }
+    }
+
+    dependencies {
+        implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+        testImplementation "org.apache.groovy:groovy-all:$groovyVersion"
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+}

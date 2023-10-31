@@ -1,0 +1,35 @@
+server:
+  port: ${SERVER_PORT:8090}
+
+spring:
+  application:
+    name: message-provider
+  mvc:
+    converters:
+      preferred-json-mapper: gson
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    connection-timeout: 15s
+
+eureka:
+  client:
+    # 需要將其註冊服務，預設開，不要註冊的時候 False 即可
+    register-with-eureka: true
+    # 是否要從 Eureka Server 取得服務註冊訊息，這是要配合負載均衡用的，單節點之下可以關閉
+    fetch-registry: true
+    service-url:
+      # 所有服務的註冊與查詢用 URL 設定
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL:http://localhost-one:7001/eureka,http://localhost-two:7002/eureka}
+  instance:
+    # 修改顯示的主機名稱
+    instance-id: ${EUREKA_INSTANCE_ID:message_provider_8090}
+    # 於頁面中 Link 顯示實際 IP 位置，而非 Domain
+    prefer-ip-address: true
+
+# 自訂用
+custom:
+  binding-name: ${CUSTOM_BINDING_NAME:my-message}

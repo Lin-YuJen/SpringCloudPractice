@@ -1,0 +1,5 @@
+FROM eclipse-temurin:17.0.4.1_1-jre-alpine
+COPY ./config-center/build/libs/config-center.jar .
+EXPOSE 3344
+ENV SERVER_PORT=3344
+CMD ["java", "-jar", "config-center.jar"]

@@ -1,0 +1,5 @@
+FROM eclipse-temurin:17.0.4.1_1-jre-alpine
+COPY ./provider-payment-consul/build/libs/provider-payment-consul.jar .
+EXPOSE 8084
+ENV SERVER_PORT=8086
+CMD ["java", "-jar", "provider-payment-consul.jar"]

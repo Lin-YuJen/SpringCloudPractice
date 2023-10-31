@@ -1,0 +1,14 @@
+spring:
+  application:
+    # 這個會顯示於 Eureka 的頁面上，以大寫的形式
+    name: payment-kt-service
+  mvc:
+    converters:
+      preferred-json-mapper: gson
+  cloud:
+    zookeeper:
+      # 如果要設定成多台 Zookeeper，直接加在後面就可以了
+      connect-string: ${ZOOKEEPER_CONNECT_STRING:127.0.0.1:2181}
+server:
+  port: ${SERVER_PORT:8084}
+

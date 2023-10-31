@@ -1,0 +1,16 @@
+FROM gradle:7.4.2-jdk17-alpine as builder
+
+WORKDIR /SpringCloudPractice
+COPY ./common /SpringCloudPractice/common
+COPY ./eureka-server /SpringCloudPractice/eureka-server
+COPY ./build.gradle /SpringCloudPractice
+COPY ./gradle.properties /SpringCloudPractice
+COPY ./settings.gradle /SpringCloudPractice
+WORKDIR /SpringCloudPractice/eureka-server
+RUN gradle build
+
+FROM eclipse-temurin:17.0.4.1_1-jre-alpine
+COPY --from=builder /SpringCloudPractice/eureka-server/build/libs/eureka-server.jar .
+EXPOSE 7001
+ENV SERVER_PORT=7001
+CMD ["java", "-jar", "eureka-server.jar"]

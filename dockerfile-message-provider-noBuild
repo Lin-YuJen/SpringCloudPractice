@@ -1,0 +1,5 @@
+FROM eclipse-temurin:17.0.4.1_1-jre-alpine
+COPY ./message-provider/build/libs/message-provider.jar .
+EXPOSE 8090
+ENV SERVER_PORT=8090
+CMD ["java", "-jar", "message-provider.jar"]

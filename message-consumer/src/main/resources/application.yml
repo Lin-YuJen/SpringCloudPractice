@@ -1,0 +1,46 @@
+server:
+  port: ${SERVER_PORT:8091}
+
+spring:
+  application:
+    name: message-consumer
+  mvc:
+    converters:
+      preferred-json-mapper: gson
+  cloud:
+    function:
+      # 需要啟用的 Method 名稱
+      definition: messageConsumer #;messageSupplier
+    stream:
+      function:
+        bindings:
+          # 自訂對應表：[方法名]-[in/out]-[Number]
+          messageConsumer-in-0: customConsumer1
+      bindings:
+        # 自訂名稱
+        customConsumer1:
+          # 綁定指定的 Exchange
+          destination: ${RECEIVE_DESTINATION:my-message}
+          group: ${RECEIVE_GROUP:my-group-1}
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    connection-timeout: 15s
+
+eureka:
+  client:
+    # 需要將其註冊服務，預設開，不要註冊的時候 False 即可
+    register-with-eureka: true
+    # 是否要從 Eureka Server 取得服務註冊訊息，這是要配合負載均衡用的，單節點之下可以關閉
+    fetch-registry: true
+    service-url:
+      # 所有服務的註冊與查詢用 URL 設定
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL:http://localhost-one:7001/eureka,http://localhost-two:7002/eureka}
+  instance:
+    # 修改顯示的主機名稱
+    instance-id: ${EUREKA_INSTANCE_ID:message_provider_8091}
+    # 於頁面中 Link 顯示實際 IP 位置，而非 Domain
+    prefer-ip-address: true

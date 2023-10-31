@@ -1,0 +1,50 @@
+spring:
+  application:
+    # 這個會顯示於 Eureka 的頁面上，以大寫的形式
+    name: payment-service
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DATABASE_USERNAME:root}
+    password: ${DATABASE_P6D:123456}
+    url: jdbc:mysql://${DATABASE_HOST:localhost:3306}/${DATABASE_NAME:cloud}
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    show-sql: true
+  mvc:
+    converters:
+      preferred-json-mapper: gson
+
+server:
+  port: ${SERVER_PORT:8080}
+
+eureka:
+  client:
+    # 需要將其註冊服務，預設開
+    register-with-eureka: true
+    # 是否要從 Eureka Server 取得服務註冊訊息，這是要配合負載均衡用的，單節點之下可以關閉
+    fetch-registry: true
+    service-url:
+      # 本服務要註冊到的位置，其 URL 為何??
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL:http://localhost.one:7001/eureka,http://localhost.two:7002/eureka}
+  instance:
+    # 修改顯示的主機名稱
+    instance-id: ${EUREKA_INSTANCE_ID:payment_8080}
+    # 於頁面中 Link 顯示實際 IP 位置，而非 Domain
+    prefer-ip-address: true
+    # 多久發送 heartbeat
+    lease-renewal-interval-in-seconds: 30
+    # 多久要設定為離線
+    lease-expiration-duration-in-seconds: 90
+# 監控
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  tracing:
+    sampling:
+      # 取樣率 0 ~ 1 ， 1 最大 (最耗性能)，預設 0.1
+      probability: 1
+  zipkin:
+    tracing:
+      endpoint:  "${ZIPKIN_URL:http://localhost:9411}/api/v2/spans"

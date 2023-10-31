@@ -1,0 +1,19 @@
+plugins {
+    id "org.springframework.boot"
+    id "io.spring.dependency-management"
+    id "org.jetbrains.kotlin.plugin.spring"
+    id "org.jetbrains.kotlin.plugin.allopen"
+}
+
+group = 'com.enix.common'
+version = '1.0'
+
+dependencies {
+    // kotlin-log
+    implementation 'io.github.microutils:kotlin-logging:3.0.5'
+    // Spring Web
+    implementation 'org.springframework.boot:spring-boot-starter-web', {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-json'
+    }
+    implementation 'com.google.code.gson:gson:2.10.1'
+}

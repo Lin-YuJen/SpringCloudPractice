@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  eureka-server-1:
+    build:
+      context: .
+      dockerfile: dockerfile-eureka
+    image: eureka-server:latest
+    environment:
+      SERVER_PORT: 7001
+      EUREKA_INSTANCE_HOSTNAME: eureka_one
+      EUREKA_CLIENT_SERVICE_URL: http://eureka-server-2:7002/eureka
+    ports:
+      - 7001:7001
+    networks:
+      - eureka-network
+
+
+  eureka-server-2:
+    build:
+      context: .
+      dockerfile: dockerfile-eureka
+    image: eureka-server:latest
+    environment:
+      SERVER_PORT: 7002
+      EUREKA_INSTANCE_HOSTNAME: eureka_two
+      EUREKA_CLIENT_SERVICE_URL: http://eureka-server-1:7001/eureka
+    ports:
+      - 7002:7002
+    networks:
+      - eureka-network
+
+  gitlab-server:
+    image: gitlab/gitlab-ce:16.0.1-ce.0
+    hostname: gitlab.me
+    container_name: gitlab-16
+    environment:
+      # 不設定加密
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url "http://gitlab.me"
+        letsencrypt['enable'] = false
+    volumes:
+      - "${gitlab_data_location}/config:/etc/gitlab"
+      - "${gitlab_data_location}/logs:/var/log/gitlab"
+      - "${gitlab_data_location}/data:/var/opt/gitlab"
+    ports:
+      - 443:443
+      - 80:80
+    extra_hosts:
+      # 內部 domain 可以由外部位置進入
+      - "gitlab.me:192.168.0.101"
+    networks:
+      - gitlab-network
+
+networks:
+  eureka-network:
+  gitlab-network:

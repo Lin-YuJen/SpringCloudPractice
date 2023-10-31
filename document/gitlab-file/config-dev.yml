@@ -1,0 +1,22 @@
+servies:
+  gitlab-server:
+    image: gitlab/gitlab-ce:16.0.1-ce.0
+    hostname: gitlab.me
+    container_name: gitlab-16
+    environment:
+      # 不設定加密
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url "http://gitlab.me"
+        letsencrypt['enable'] = false
+    volumes: # local 儲存路徑從 .env 檔案中讀取
+      - "${gitlab_data_location}/config:/etc/gitlab"
+      - "${gitlab_data_location}/logs:/var/log/gitlab"
+      - "${gitlab_data_location}/data:/var/opt/gitlab"
+    ports:
+      - 443:443
+      - 80:80
+    networks:
+      - gitlab-network
+
+networks:
+  gitlab-network:

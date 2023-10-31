@@ -1,0 +1,41 @@
+plugins {
+    id "org.springframework.boot"
+    id "io.spring.dependency-management"
+    id "org.jetbrains.kotlin.plugin.spring"
+    id "org.jetbrains.kotlin.plugin.allopen"
+    id "org.jetbrains.kotlin.plugin.jpa"
+}
+
+group = 'com.enix.providerZK'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+dependencies {
+    // Common Library
+    implementation project(':common')
+    // kotlin-log
+    implementation 'io.github.microutils:kotlin-logging:3.0.5'
+    // Develop tool
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    // Database：快速測試，不用 DB
+//    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+//    runtimeOnly 'com.mysql:mysql-connector-j'
+    // Web
+    implementation 'org.springframework.boot:spring-boot-starter-web', {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-json'
+    }
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'org.springframework.boot:spring-boot-starter-tomcat'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // Zookeeper
+    implementation 'org.springframework.cloud:spring-cloud-starter-zookeeper-discovery:4.0.0'
+
+    // Test
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+}

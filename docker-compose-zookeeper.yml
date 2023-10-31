@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  zookeeper-1:
+    # Image 版本 3.6 對應 spring-cloud-starter-zookeeper-discovery:4.0.0
+    image: zookeeper:3.6
+    ports:
+      - "2181:2181"
+    restart: always
+    networks:
+      zookeeper-network:
+
+  payment-service-1:
+    build:
+      context: .
+      dockerfile: dockerfile-payment-zookeeper-noBuild
+    image: payment-service-zookeeper:latest
+    environment:
+      SERVER_PORT: 8084
+      ZOOKEEPER_CONNECT_STRING: zookeeper-1:2181
+    networks:
+      zookeeper-network:
+    depends_on:
+      - zookeeper-1
+networks:
+  zookeeper-network:

@@ -1,0 +1,16 @@
+FROM gradle:7.4.2-jdk17-alpine as builder
+
+WORKDIR /SpringCloudPractice
+COPY ./common /SpringCloudPractice/common
+COPY ./consumer-order /SpringCloudPractice/consumer-order
+COPY ./build.gradle /SpringCloudPractice
+COPY ./gradle.properties /SpringCloudPractice
+COPY ./settings.gradle /SpringCloudPractice
+WORKDIR /SpringCloudPractice/consumer-order
+RUN gradle build
+
+FROM eclipse-temurin:17.0.4.1_1-jre-alpine
+COPY --from=builder /SpringCloudPractice/consumer-order/build/libs/consumer-order.jar .
+EXPOSE 80
+ENV SERVER_PORT=80
+CMD ["java", "-jar", "consumer-order.jar"]

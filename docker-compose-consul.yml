@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  consul-1:
+    image: consul:1.8.0
+    # -client 是表明限制何種位置能允許 request 過來，0.0.0.0 表示不限制
+    command: >
+      consul agent
+      -server
+      -bootstrap-expect=1
+      -client=0.0.0.0
+      -data-dir=/consul/data
+      -ui
+    ports:
+      # 8500 是 UI 的 Port
+      - "8500:8500"
+      - "8600:8600/tcp"
+      - "8600:8600/udp"
+    networks:
+      consul-network:
+    # 需要指定儲存資料的位置在哪裡，否則啟動不能
+    volumes:
+      - consul-volumes:/consul/data
+
+  payment-service-1:
+    build:
+      context: .
+      dockerfile: dockerfile-payment-consul-noBuild
+    image: payment-service-consul:latest
+    environment:
+      SERVER_PORT: 8086
+      CONSUL_HOST: consul-1
+      CONSUL_PORT: 8500
+      CONSUL_SERVICE_NAME: payment-service-1
+    networks:
+      consul-network:
+    ports:
+      - 8086:8086
+    depends_on:
+      - consul-1
+networks:
+  consul-network:
+volumes:
+  consul-volumes:
